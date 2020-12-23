@@ -23,9 +23,9 @@ namespace SqlExecutionResponseTypeChecker
             testConnection();
         }
 
-        private void buttonExecute_Click(object sender, EventArgs e)
+        private void buttonExecuteDataReader_Click(object sender, EventArgs e)
         {
-            execute();
+            executeDataReader();
         }
 
         private void updateDSN(object sender, EventArgs e)
@@ -64,7 +64,7 @@ namespace SqlExecutionResponseTypeChecker
             }
         }
 
-        private void execute()
+        private void executeDataReader()
         {
             // To Do: Add message like 'Sorry, we're not going to let you do that!' when textBoxSQL.Text contains string 'DELETE' or 'UPDATE' without a 'WHERE' string.
             textBoxResponse.Text = "";
@@ -83,7 +83,7 @@ namespace SqlExecutionResponseTypeChecker
                 reader = cmd.ExecuteReader();
                 if (reader.FieldCount < 1)
                 {
-                    MessageBox.Show("Some queries (like UPDATE statements) return no results for the SqlDataReader to read.");
+                    MessageBox.Show("Some queries (like UPDATE statements) return no results for the SqlDataReader to read. Use ExecuteNonQuery for those.");
                 }
                 while (reader.Read())
                 {
@@ -96,6 +96,39 @@ namespace SqlExecutionResponseTypeChecker
                 }
                 reader.Close();
                 textBoxResponse.Text += string.Join(Environment.NewLine, results);
+            }
+            catch (Exception e)
+            {
+                textBoxResponse.Text += e.Message;
+            }
+        }
+
+        private void buttonExecuteNonQuery_Click(object sender, EventArgs e)
+        {
+            executeNonQuery();
+        }
+
+        private void executeNonQuery()
+        {
+            // To Do: Add message like 'Sorry, we're not going to let you do that!' when textBoxSQL.Text contains string 'DELETE' or 'UPDATE' without a 'WHERE' string.
+            textBoxResponse.Text = "";
+            string SqlConnectionString = textBoxConnectionString.Text;
+            SqlConnection sqlConnection = new SqlConnection(SqlConnectionString);
+            SqlCommand cmd = new SqlCommand();
+            Int32 reader;
+            cmd.CommandText = textBoxSQL.Text;
+            cmd.CommandType = CommandType.Text;
+            cmd.Connection = sqlConnection;
+            try
+            {
+                sqlConnection.Open();
+                reader = cmd.ExecuteNonQuery();
+                if (reader == -1)
+                {
+                    MessageBox.Show("Some queries (like SELECT statements) return results that ExecuteNonQuery can't ready. Use SqlDataReader for those.");
+                }
+                sqlConnection.Close();
+                textBoxResponse.Text += reader.ToString();
             }
             catch (Exception e)
             {
